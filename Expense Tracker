@@ -1,0 +1,122 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+class Expense implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    String description;
+    double amount;
+    String category;
+
+    public Expense(String description, double amount, String category) {
+        this.description = description;
+        this.amount = amount;
+        this.category = category;
+    }
+
+    @Override
+    public String toString() {
+        return "Description: " + description + ", Amount: Rs." + amount + ", Category: " + category;
+    }
+}
+
+public class ExpenseTracker {
+    private static final String FILENAME = "expenses.ser";
+    private static ArrayList<Expense> expenses = new ArrayList<>();
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        loadExpenses();
+
+        while (true) {
+            displayMenu();
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume the newline character
+
+            switch (choice) {
+            case 1:
+                addExpense();
+                break;
+            case 2:
+                viewExpenses();
+                break;
+            case 3:
+                viewExpenseSummaries();
+                break;
+            case 4:
+                saveExpenses();
+                System.out.println("Exiting Expense Tracker. Goodbye!");
+                System.exit(0);
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private static void displayMenu() {
+        System.out.println("\nExpense Tracker Menu:");
+        System.out.println("1. Add Expense");
+        System.out.println("2. View Expenses");
+        System.out.println("3. View Expense Summaries");
+        System.out.println("4. Save and Exit");
+        System.out.print("Enter your choice: ");
+    }
+
+    private static void addExpense() {
+        System.out.print("Enter expense description: ");
+        String description = scanner.nextLine();
+
+        double amount;
+        while (true) {
+            System.out.print("Enter expense amount: Rs.");
+            try {
+                amount = Double.parseDouble(scanner.nextLine());
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
+        }
+
+        System.out.print("Enter expense category: ");
+        String category = scanner.nextLine();
+
+        Expense newExpense = new Expense(description, amount, category);
+        expenses.add(newExpense);
+
+        System.out.println("Expense added successfully!");
+    }
+
+    private static void viewExpenses() {
+        System.out.println("\nExpense List:");
+        for (Expense expense : expenses) {
+            System.out.println(expense);
+        }
+    }
+
+    private static void viewExpenseSummaries() {
+        // Implement your logic for expense summaries (total expenses, category-wise expenses, etc.)
+        // This could involve iterating through the 'expenses' list and performing calculations.
+    }
+
+    private static void saveExpenses() {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(FILENAME))) {
+            outputStream.writeObject(expenses);
+            System.out.println("Expenses saved successfully.");
+        } catch (IOException e) {
+            System.out.println("Error saving expenses: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void loadExpenses() {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(FILENAME))) {
+            expenses = (ArrayList<Expense>) inputStream.readObject();
+            System.out.println("Expenses loaded successfully.");
+        } catch (IOException | ClassNotFoundException e) {
+            // If the file does not exist or cannot be read, it's okay; just start with an empty list.
+            System.out.println("No previous expenses found.");
+        }
+    }
+}
